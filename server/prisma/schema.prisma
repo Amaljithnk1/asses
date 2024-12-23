@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum for Cohort
+enum Cohort {
+  AY_2024_25
+  AY_2023_24
+}
+
+enum CourseName {
+  CBSE_9_SCIENCE
+  CBSE_9_MATH
+}
+
+
+model Student {
+  id         Int       @id @default(autoincrement())
+  name       CourseName
+  cohort     Cohort
+  dateJoined DateTime
+  lastLogin  DateTime
+  status     Boolean
+  enrolledCourses CourseEnrollment[]
+  createdAt  DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+
+  @@index([cohort])
+}
+
+model Course {
+  id       Int       @id @default(autoincrement())
+  name     String
+  icon     String?   @default("default-icon.svg")
+  students CourseEnrollment[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model CourseEnrollment {
+  id        Int      @id @default(autoincrement())
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  Int
+
+  @@unique([studentId, courseId])
+}
